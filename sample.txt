@@ -1,0 +1,79 @@
+1  mkdir test2
+2  cd test2
+3  ls
+4  git init
+5  touch 1.txt
+6  touch 2.txt
+7  git status
+8  git commit -m "first commit"
+9  git add .
+10  git commit -m "first commit"
+11  git status
+12  git remote add origin https://github.com/kamranhamid32/test1.git
+13  git remote set-url origin https://<TOKEN>@github.com/kamranhamid32/test1
+14  git push origin master
+
+=====================================
+ANSIBLE
+1 Control EC2 instance ubuntu t2.micro
+3 EC2 instance -web01 and web02 and db01 centos 9 t2.micro
+
+we will install ansible to control ec2 instance
+ssh to control ec2 instance
+1 ssh -i Downloads/control.pem ubuntu@PUBLIC IP
+2 sudo apt update
+3 sudo add-apt-repository --yes --update ppa:ansible/ansible
+4 sudo apt install ansible -y
+----ansible uses python
+5 ansible --version
+ ------- Establshing connection between control and target machine. ansible uses ssh to connect
+6  mkdir vprofile
+7  cd vprofile
+8 vim inventory
+all:
+  hosts:
+    web01:
+      ansible_host: PRIVATE IP
+    web02:
+      ansible_host: PRIVATE IP
+    db01:
+      ansible_host: PRIVATE IP
+
+  children:
+    webservers:
+      hosts:
+        web01:
+        web02:
+    dbservers:
+      hosts:
+        db01:
+    dc_oregon:
+      children:
+        webservers:
+        dbservers:
+      vars:
+        ansible_user: ec2-user
+        ansible_ssh_private_key_file: KEYPAIR NAME
+--------------
+
+EXIT from the control ec2 instance
+9 cat Downloads/KEYPAIR NAME  ( client ssh key, copy it)
+10 ssh to control ec2 instance
+11 cd vprofile
+12  vim KEYPAIR NAME
+13 paste the ssh key and save and exit
+--- Now we will change the permission option to ssh so that when control instance ssh to client instance it doesn't ask question
+14 sudo -i
+15 cd /etc/ansible/
+16 ls
+17 mv ansible.cfg ansible_backup.cfg
+18 ansible-config init --disabled -t all > ansible.cfg
+19 vim ansible.cfg
+20 search for host_key_checking=False  and change the value to False
+21 exit
+22  ls -l
+23  chmod 400 KEYPAIR NAME
+24  ls -l
+25 ansible all -m ping -i inventory
+26 ansible webservers -m ping -i inventory
+27 ansible dc_oregon -m ping -i inventory
